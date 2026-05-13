@@ -10,17 +10,22 @@ from typing import Any
 class Win32ModernglBackend:
     """Backend shell that combines pywin32 windowing with a ModernGL context."""
 
+    _SYSTEM_COLOR_BRUSH_OFFSET = 1
+    _ERROR_CLASS_ALREADY_EXISTS = 1410
+
     def __init__(
         self,
         win32gui_module: Any | None = None,
         moderngl_module: Any | None = None,
         win32con_module: Any | None = None,
         win32api_module: Any | None = None,
+        pywintypes_module: Any | None = None,
     ) -> None:
         self.win32gui = win32gui_module
         self.moderngl = moderngl_module
         self.win32con = win32con_module
         self.win32api = win32api_module
+        self.pywintypes = pywintypes_module
 
         if self.win32gui is None:
             try:
@@ -51,6 +56,22 @@ class Win32ModernglBackend:
                 raise RuntimeError("pywin32 win32api is required to create the Win32 window.") from exc
             self.win32api = win32api
 
+        if self.pywintypes is None:
+            try:
+                import pywintypes  # type: ignore
+            except ImportError:
+                self.pywintypes = None
+            else:
+                self.pywintypes = pywintypes
+
+    def _is_class_already_exists_error(self, exc: BaseException) -> bool:
+        error_code = getattr(exc, "winerror", None)
+        if error_code is None and getattr(exc, "args", None):
+            first_arg = exc.args[0]
+            if isinstance(first_arg, int):
+                error_code = first_arg
+        return error_code == self._ERROR_CLASS_ALREADY_EXISTS
+
     def _wndproc(self, hwnd: Any, message: int, wparam: Any, lparam: Any) -> Any:
         if message == getattr(self.win32con, "WM_DESTROY", 2):
             self.win32gui.PostQuitMessage(0)
@@ -78,14 +99,26 @@ class Win32ModernglBackend:
         if hasattr(self.win32gui, "LoadCursor"):
             wndclass.hCursor = self.win32gui.LoadCursor(0, getattr(self.win32con, "IDC_ARROW", 32512))
         # Win32 expects (COLOR_* constant + 1) when a class background uses a system color brush.
-        color_window_brush = getattr(self.win32con, "COLOR_WINDOW", 5) + 1
+        color_window_brush = getattr(self.win32con, "COLOR_WINDOW", 5) + self._SYSTEM_COLOR_BRUSH_OFFSET
         wndclass.hbrBackground = color_window_brush
 
-        try:
+        register_error_types: list[type[BaseException]] = []
+        win32gui_error_type = getattr(self.win32gui, "error", None)
+        if isinstance(win32gui_error_type, type) and issubclass(win32gui_error_type, BaseException):
+            register_error_types.append(win32gui_error_type)
+        pywintypes_error_type = getattr(self.pywintypes, "error", None) if self.pywintypes is not None else None
+        if isinstance(pywintypes_error_type, type) and issubclass(pywintypes_error_type, BaseException):
+            register_error_types.append(pywintypes_error_type)
+
+        if register_error_types:
+            try:
+                self.win32gui.RegisterClass(wndclass)
+            except tuple(register_error_types) as exc:
+                # Class can already exist when restarting quickly; it's safe to continue.
+                if not self._is_class_already_exists_error(exc):
+                    raise
+        else:
             self.win32gui.RegisterClass(wndclass)
-        except Exception:
-            # Class can already exist when restarting quickly; it's safe to continue.
-            pass
 
         hwnd = self.win32gui.CreateWindow(
             class_name,
@@ -115,7 +148,7 @@ class Win32ModernglBackend:
     ) -> Any:
         hwnd = self.create_window(title=title, width=width, height=height)
         frame_count = 0
-        while True:
+        while max_frames is None or frame_count < max_frames:
             if hasattr(self.win32gui, "PumpWaitingMessages"):
                 if self.win32gui.PumpWaitingMessages():
                     break
@@ -124,8 +157,6 @@ class Win32ModernglBackend:
                 on_frame(hwnd, frame_count)
 
             frame_count += 1
-            if max_frames is not None and frame_count >= max_frames:
-                break
 
             if frame_sleep_seconds > 0:
                 time.sleep(frame_sleep_seconds)

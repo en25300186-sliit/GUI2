@@ -44,8 +44,8 @@ class TestScratchObjects(unittest.TestCase):
         def click_handler(value):
             return value + 1
 
-        chained = obj.on_click(click_handler)
-        self.assertIs(chained, obj)
+        returned = obj.on_click(click_handler)
+        self.assertIs(returned, click_handler)
         self.assertEqual(obj.trigger_click(41), 42)
 
     def test_callbacks_can_also_use_decorator_style(self):
@@ -57,6 +57,16 @@ class TestScratchObjects(unittest.TestCase):
 
         self.assertEqual(click_handler(), "ok")
         self.assertEqual(obj.trigger_click(), "ok")
+
+    def test_callbacks_can_use_decorator_without_parentheses(self):
+        obj = Object()
+
+        @obj.on_click
+        def click_handler():
+            return "plain"
+
+        self.assertEqual(click_handler(), "plain")
+        self.assertEqual(obj.trigger_click(), "plain")
 
 
 if __name__ == "__main__":

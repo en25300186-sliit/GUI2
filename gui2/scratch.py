@@ -77,11 +77,11 @@ class Object:
         self._notify_gui_sync()
         return self
 
-    def on_click(self, callback: Callable[..., Any] | None = None) -> "Object" | CallbackDecorator:
+    def on_click(self, callback: Callable[..., Any] | None = None) -> Callable[..., Any] | CallbackDecorator:
         if callback is not None:
             self.metadata["on_click"] = callback
             self._notify_gui_sync()
-            return self
+            return callback
 
         def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
             self.metadata["on_click"] = fn
@@ -90,11 +90,11 @@ class Object:
 
         return decorator
 
-    def on_collide(self, callback: Callable[..., Any] | None = None) -> "Object" | CallbackDecorator:
+    def on_collide(self, callback: Callable[..., Any] | None = None) -> Callable[..., Any] | CallbackDecorator:
         if callback is not None:
             self.metadata["on_collide"] = callback
             self._notify_gui_sync()
-            return self
+            return callback
 
         def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
             self.metadata["on_collide"] = fn
@@ -102,6 +102,14 @@ class Object:
             return fn
 
         return decorator
+
+    def set_on_click(self, callback: Callable[..., Any]) -> "Object":
+        self.on_click(callback)
+        return self
+
+    def set_on_collide(self, callback: Callable[..., Any]) -> "Object":
+        self.on_collide(callback)
+        return self
 
     def trigger_click(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_click")

@@ -50,8 +50,8 @@ class Object:
         return self
 
     def set_size(self, width: float, height: float) -> "Object":
-        self.metadata["width"] = width
-        self.metadata["height"] = height
+        self.metadata["width"] = max(0.0, width)
+        self.metadata["height"] = max(0.0, height)
         self._update_status_from_viewport()
         self._notify_gui_sync()
         return self
@@ -104,12 +104,14 @@ class Object:
 
     def trigger_click(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_click")
+        # Disabled when hidden/out_of_screen to skip GUI interaction math.
         if callback is None or self.status != STATUS_ACTIVE:
             return None
         return callback(*args, **kwargs)
 
     def trigger_collide(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_collide")
+        # Disabled when hidden/out_of_screen to skip GUI interaction math.
         if callback is None or self.status != STATUS_ACTIVE:
             return None
         return callback(*args, **kwargs)

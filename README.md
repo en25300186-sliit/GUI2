@@ -37,6 +37,8 @@ player.set_meta("x", 300)  # metadata still updates while hidden
 player.show()              # object returns as active/out_of_screen based on viewport
 ```
 
+`on_click`/`on_collide` callbacks run only when object status is `active` (skipped for `out_of_screen` and `hidden`).
+
 ## Tests
 
 ```bash

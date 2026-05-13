@@ -3,7 +3,7 @@ import unittest
 from gui2.scratch import STATUS_ACTIVE, STATUS_HIDDEN, STATUS_OUT_OF_SCREEN, Object, ObjectGroup
 
 
-class TestScratchLayer(unittest.TestCase):
+class TestScratchObjects(unittest.TestCase):
     def test_metadata_change_triggers_gui_sync(self):
         obj = Object()
         events = []

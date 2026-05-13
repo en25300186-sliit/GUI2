@@ -24,18 +24,23 @@ def intersects(a: Object, b: Object) -> bool:
 
 
 def run() -> None:
-    world = ObjectGroup().set_viewport(0, 0, 20, 10)
+    viewport_x, viewport_y, viewport_width, viewport_height = 0, 0, 20, 10
+    coin_x = 15
+    coin_y_positions = (1, 8)
+
+    world = ObjectGroup().set_viewport(viewport_x, viewport_y, viewport_width, viewport_height)
 
     player = Object().set_size(1, 1).set_position(1, 5)
-    coin = Object().set_size(1, 1).set_position(15, 5)
+    coin = Object().set_size(1, 1).set_position(coin_x, 5)
     world.add(player).add(coin)
 
-    score = [0]
+    score = 0
 
     @coin.on_click()
     def collect_coin() -> None:
-        score[0] += 1
-        coin.set_position(15, 1 if score[0] % 2 == 0 else 8)
+        nonlocal score
+        score += 1
+        coin.set_position(coin_x, coin_y_positions[0] if score % 2 == 0 else coin_y_positions[1])
 
     @player.on_collide()
     def on_player_collide(other: Object) -> None:
@@ -50,7 +55,7 @@ def run() -> None:
         py = int(player.get_meta("y"))
         cx = int(coin.get_meta("x"))
         cy = int(coin.get_meta("y"))
-        print(f"Player=({px},{py}) Coin=({cx},{cy}) Score={score[0]}")
+        print(f"Player=({px},{py}) Coin=({cx},{cy}) Score={score}")
 
         move = input("move> ").strip().lower()
         if move == "q":
@@ -70,8 +75,8 @@ def run() -> None:
             print("Invalid input.")
             continue
 
-        nx = max(0, min(19, px + dx))
-        ny = max(0, min(9, py + dy))
+        nx = max(viewport_x, min(viewport_x + viewport_width - 1, px + dx))
+        ny = max(viewport_y, min(viewport_y + viewport_height - 1, py + dy))
         player.set_position(nx, ny)
 
         # This example performs collision checks in the loop, then triggers callbacks.

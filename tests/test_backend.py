@@ -72,6 +72,16 @@ class FakeWin32Gui:
         self.quit_posted = True
 
 
+class FakeWin32GuiQuitOnFirstPump(FakeWin32Gui):
+    def __init__(self):
+        super().__init__()
+        self.pump_calls = 0
+
+    def PumpWaitingMessages(self):
+        self.pump_calls += 1
+        return 1
+
+
 class TestBackend(unittest.TestCase):
     def test_backend_creates_context(self):
         backend = Win32ModernglBackend(win32gui_module=object(), moderngl_module=FakeModerngl())
@@ -115,8 +125,8 @@ class TestBackend(unittest.TestCase):
 
         self.assertEqual(frames, [0, 1, 2])
 
-    def test_wndproc_posts_quit_on_destroy(self):
-        win32gui = FakeWin32Gui()
+    def test_draw_window_exits_when_quit_message_is_pumped(self):
+        win32gui = FakeWin32GuiQuitOnFirstPump()
         backend = Win32ModernglBackend(
             win32gui_module=win32gui,
             moderngl_module=FakeModerngl(),
@@ -124,8 +134,11 @@ class TestBackend(unittest.TestCase):
             win32api_module=FakeWin32Api(),
         )
 
-        backend._wndproc(hwnd=1, message=FakeWin32Con.WM_DESTROY, wparam=0, lparam=0)
-        self.assertTrue(win32gui.quit_posted)
+        frames = []
+        backend.draw_window(on_frame=lambda *_: frames.append("frame"), max_frames=10, frame_sleep_seconds=0)
+
+        self.assertEqual(frames, [])
+        self.assertEqual(win32gui.pump_calls, 1)
 
 
 if __name__ == "__main__":

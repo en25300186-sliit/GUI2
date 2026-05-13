@@ -12,7 +12,7 @@ class Win32ModernglBackend:
 
     _SYSTEM_COLOR_BRUSH_OFFSET = 1
     _ERROR_CLASS_ALREADY_EXISTS = 1410
-    _DEFAULT_FRAME_SLEEP_SECONDS = 1 / 60  # Target ~60 FPS.
+    _DEFAULT_FRAME_SLEEP_SECONDS = 1 / 60  # Target 60 FPS.
 
     def __init__(
         self,

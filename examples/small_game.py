@@ -30,12 +30,17 @@ def run() -> None:
     coin = Object().set_size(1, 1).set_position(15, 5)
     world.add(player).add(coin)
 
-    score = {"value": 0}
+    score = [0]
 
     @coin.on_click()
     def collect_coin() -> None:
-        score["value"] += 1
-        coin.set_position(15, 1 if score["value"] % 2 == 0 else 8)
+        score[0] += 1
+        coin.set_position(15, 1 if score[0] % 2 == 0 else 8)
+
+    @player.on_collide()
+    def on_player_collide(other: Object) -> None:
+        if other is coin:
+            collect_coin()
 
     print("Small Game: reach the C coin with P.")
     print("Controls: a=left, d=right, w=up, s=down, q=quit")
@@ -45,7 +50,7 @@ def run() -> None:
         py = int(player.get_meta("y"))
         cx = int(coin.get_meta("x"))
         cy = int(coin.get_meta("y"))
-        print(f"Player=({px},{py}) Coin=({cx},{cy}) Score={score['value']}")
+        print(f"Player=({px},{py}) Coin=({cx},{cy}) Score={score[0]}")
 
         move = input("move> ").strip().lower()
         if move == "q":
@@ -70,7 +75,7 @@ def run() -> None:
         player.set_position(nx, ny)
 
         if player.status == STATUS_ACTIVE and intersects(player, coin):
-            coin.trigger_click()
+            player.trigger_collide(coin)
 
 
 if __name__ == "__main__":

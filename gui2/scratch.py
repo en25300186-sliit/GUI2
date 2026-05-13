@@ -74,15 +74,33 @@ class Object:
         self._notify_gui_sync()
         return self
 
-    def on_click(self, callback: Callable[..., Any]) -> Callable[..., Any]:
-        self.metadata["on_click"] = callback
-        self._notify_gui_sync()
-        return callback
+    def on_click(self, callback: Callable[..., Any] | None = None) -> "Object" | Callable[[Callable[..., Any]], Callable[..., Any]]:
+        if callback is not None:
+            self.metadata["on_click"] = callback
+            self._notify_gui_sync()
+            return self
 
-    def on_collide(self, callback: Callable[..., Any]) -> Callable[..., Any]:
-        self.metadata["on_collide"] = callback
-        self._notify_gui_sync()
-        return callback
+        def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
+            self.metadata["on_click"] = fn
+            self._notify_gui_sync()
+            return fn
+
+        return decorator
+
+    def on_collide(
+        self, callback: Callable[..., Any] | None = None
+    ) -> "Object" | Callable[[Callable[..., Any]], Callable[..., Any]]:
+        if callback is not None:
+            self.metadata["on_collide"] = callback
+            self._notify_gui_sync()
+            return self
+
+        def decorator(fn: Callable[..., Any]) -> Callable[..., Any]:
+            self.metadata["on_collide"] = fn
+            self._notify_gui_sync()
+            return fn
+
+        return decorator
 
     def trigger_click(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_click")

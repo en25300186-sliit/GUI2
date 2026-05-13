@@ -27,9 +27,10 @@ group = ObjectGroup().set_viewport(0, 0, 1280, 720)
 player = Object().set_size(64, 64).set_position(200, 150)
 group.add(player)
 
-@player.on_click
 def clicked():
     print("clicked")
+
+player.on_click(clicked)
 
 player.hide()
 player.set_meta("x", 300)  # metadata still updates while hidden

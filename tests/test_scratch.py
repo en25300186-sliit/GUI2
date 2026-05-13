@@ -39,8 +39,19 @@ class TestScratchLayer(unittest.TestCase):
         def click_handler(value):
             return value + 1
 
-        obj.on_click(click_handler)
+        chained = obj.on_click(click_handler)
+        self.assertIs(chained, obj)
         self.assertEqual(obj.trigger_click(41), 42)
+
+    def test_callbacks_can_also_use_decorator_style(self):
+        obj = Object()
+
+        @obj.on_click()
+        def click_handler():
+            return "ok"
+
+        self.assertEqual(click_handler(), "ok")
+        self.assertEqual(obj.trigger_click(), "ok")
 
 
 if __name__ == "__main__":

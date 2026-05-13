@@ -113,14 +113,14 @@ class Object:
 
     def trigger_click(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_click")
-        # Disabled when hidden/out_of_screen to skip GUI interaction math.
+        # Disables when hidden/out_of_screen to skip GUI interaction math.
         if callback is None or self.status != STATUS_ACTIVE:
             return None
         return callback(*args, **kwargs)
 
     def trigger_collide(self, *args: Any, **kwargs: Any) -> Any:
         callback = self.metadata.get("on_collide")
-        # Disabled when hidden/out_of_screen to skip GUI interaction math.
+        # Disables when hidden/out_of_screen to skip GUI interaction math.
         if callback is None or self.status != STATUS_ACTIVE:
             return None
         return callback(*args, **kwargs)

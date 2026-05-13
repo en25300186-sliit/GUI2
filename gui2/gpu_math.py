@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -51,7 +52,7 @@ class CupyMatrixEngine:
         )
 
     def rotation_degrees(self, degrees: float) -> Any:
-        radians = degrees * 3.141592653589793 / 180.0
+        radians = degrees * math.pi / 180.0
         cosine = self.cp.cos(radians)
         sine = self.cp.sin(radians)
         return self.cp.array(

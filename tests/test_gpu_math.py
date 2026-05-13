@@ -50,6 +50,15 @@ class TestGpuMath(unittest.TestCase):
         transformed = transform.apply_points(points)
         self.assertEqual(transformed.data, [[7.0, 2.0, 1.0]])
 
+    def test_rotation_90_degrees(self):
+        engine = CupyMatrixEngine(cp_module=FakeCuPy())
+        transform = Transform2D.identity(engine).rotate_degrees(90)
+        points = FakeCuPy.array([[1.0, 0.0, 1.0]])
+        transformed = transform.apply_points(points)
+        self.assertAlmostEqual(transformed.data[0][0], 0.0, places=5)
+        self.assertAlmostEqual(transformed.data[0][1], 1.0, places=5)
+        self.assertEqual(transformed.data[0][2], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()

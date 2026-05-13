@@ -26,6 +26,11 @@ class TestScratchObjects(unittest.TestCase):
         obj.show()
         self.assertEqual(obj.status, STATUS_OUT_OF_SCREEN)
 
+    def test_set_meta_clamps_negative_size_values(self):
+        obj = Object().set_meta("width", -10).set_meta("height", -20)
+        self.assertEqual(obj.get_meta("width"), 0.0)
+        self.assertEqual(obj.get_meta("height"), 0.0)
+
     def test_object_group_inherits_object_and_propagates_viewport(self):
         group = ObjectGroup()
         child = Object().set_position(999, 10)

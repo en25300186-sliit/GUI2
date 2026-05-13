@@ -34,6 +34,8 @@ class Object:
         return self
 
     def set_meta(self, key: str, value: Any) -> "Object":
+        if key in {"width", "height"}:
+            value = max(0.0, float(value))
         self.metadata[key] = value
         if key in {"x", "y", "width", "height"}:
             self._update_status_from_viewport()

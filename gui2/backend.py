@@ -12,6 +12,7 @@ class Win32ModernglBackend:
 
     _SYSTEM_COLOR_BRUSH_OFFSET = 1
     _ERROR_CLASS_ALREADY_EXISTS = 1410
+    _DEFAULT_FRAME_SLEEP_SECONDS = 1 / 60  # Target ~60 FPS.
 
     def __init__(
         self,
@@ -102,18 +103,18 @@ class Win32ModernglBackend:
         color_window_brush = getattr(self.win32con, "COLOR_WINDOW", 5) + self._SYSTEM_COLOR_BRUSH_OFFSET
         wndclass.hbrBackground = color_window_brush
 
-        register_error_types: list[type[BaseException]] = []
+        registration_exception_types: list[type[BaseException]] = []
         win32gui_error_type = getattr(self.win32gui, "error", None)
         if isinstance(win32gui_error_type, type) and issubclass(win32gui_error_type, BaseException):
-            register_error_types.append(win32gui_error_type)
+            registration_exception_types.append(win32gui_error_type)
         pywintypes_error_type = getattr(self.pywintypes, "error", None) if self.pywintypes is not None else None
         if isinstance(pywintypes_error_type, type) and issubclass(pywintypes_error_type, BaseException):
-            register_error_types.append(pywintypes_error_type)
+            registration_exception_types.append(pywintypes_error_type)
 
-        if register_error_types:
+        if registration_exception_types:
             try:
                 self.win32gui.RegisterClass(wndclass)
-            except tuple(register_error_types) as exc:
+            except tuple(registration_exception_types) as exc:
                 # Class can already exist when restarting quickly; it's safe to continue.
                 if not self._is_class_already_exists_error(exc):
                     raise
@@ -144,7 +145,7 @@ class Win32ModernglBackend:
         height: int = 720,
         on_frame: Callable[[Any, int], None] | None = None,
         max_frames: int | None = None,
-        frame_sleep_seconds: float = 1 / 60,
+        frame_sleep_seconds: float = _DEFAULT_FRAME_SLEEP_SECONDS,
     ) -> Any:
         hwnd = self.create_window(title=title, width=width, height=height)
         frame_count = 0

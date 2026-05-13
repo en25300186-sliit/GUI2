@@ -26,9 +26,9 @@ def intersects(a: Object, b: Object) -> bool:
 def run() -> None:
     viewport_x, viewport_y, viewport_width, viewport_height = 0, 0, 20, 10
     coin_x = viewport_x + viewport_width - 5
-    upper_coin_y = min(viewport_y + viewport_height - 1, viewport_y + 1)
-    lower_coin_y = max(viewport_y, viewport_y + viewport_height - 2)
-    coin_y_positions = (upper_coin_y, lower_coin_y)
+    top_coin_y = min(viewport_y + viewport_height - 1, viewport_y + 1)
+    bottom_coin_y = max(viewport_y, viewport_y + viewport_height - 2)
+    coin_y_positions = (top_coin_y, bottom_coin_y)
 
     world = ObjectGroup().set_viewport(viewport_x, viewport_y, viewport_width, viewport_height)
 
@@ -78,7 +78,7 @@ def run() -> None:
         player.set_position(nx, ny)
 
         # This example performs collision checks in the loop, then triggers callbacks.
-        if player.status == STATUS_ACTIVE and intersects(player, coin):
+        if player.status == STATUS_ACTIVE and coin.status == STATUS_ACTIVE and intersects(player, coin):
             player.trigger_collide(coin)
 
 

@@ -36,16 +36,12 @@ def run() -> None:
 
     score = 0
 
-    @coin.on_click()
-    def collect_coin() -> None:
-        nonlocal score
-        score += 1
-        coin.set_position(coin_x, coin_y_positions[0] if score % 2 == 0 else coin_y_positions[1])
-
     @player.on_collide()
     def on_player_collide(other: Object) -> None:
+        nonlocal score
         if other is coin:
-            collect_coin()
+            score += 1
+            coin.set_position(coin_x, coin_y_positions[score % 2])
 
     print("Small Game: reach the coin (C) with the player (P).")
     print("Controls: a=left, d=right, w=up, s=down, q=quit")

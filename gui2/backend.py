@@ -77,7 +77,9 @@ class Win32ModernglBackend:
 
         if hasattr(self.win32gui, "LoadCursor"):
             wndclass.hCursor = self.win32gui.LoadCursor(0, getattr(self.win32con, "IDC_ARROW", 32512))
-        wndclass.hbrBackground = getattr(self.win32con, "COLOR_WINDOW", 5) + 1
+        # Win32 expects (COLOR_* constant + 1) when a class background uses a system color brush.
+        color_window_brush = getattr(self.win32con, "COLOR_WINDOW", 5) + 1
+        wndclass.hbrBackground = color_window_brush
 
         try:
             self.win32gui.RegisterClass(wndclass)
@@ -115,7 +117,7 @@ class Win32ModernglBackend:
         frame_count = 0
         while True:
             if hasattr(self.win32gui, "PumpWaitingMessages"):
-                if bool(self.win32gui.PumpWaitingMessages()):
+                if self.win32gui.PumpWaitingMessages():
                     break
 
             if on_frame is not None:

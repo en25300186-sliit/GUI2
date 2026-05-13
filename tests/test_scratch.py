@@ -1,22 +1,46 @@
 import unittest
 
-from gui2.scratch import Stage
+from gui2.scratch import STATUS_ACTIVE, STATUS_HIDDEN, STATUS_OUT_OF_SCREEN, Object, ObjectGroup
 
 
 class TestScratchLayer(unittest.TestCase):
-    def test_when_flag_clicked_script_uses_block_api(self):
-        stage = Stage()
-        script = stage.when_flag_clicked().move_steps(10).turn_right_degrees(15).say("Hello")
+    def test_metadata_change_triggers_gui_sync(self):
+        obj = Object()
+        events = []
+        obj.bind_gui_sync(lambda changed: events.append(changed.metadata["x"]))
+        obj.set_position(12, 3)
+        self.assertEqual(events[-1], 12)
 
-        self.assertIn("event_whenflagclicked", stage.scripts_by_event)
-        self.assertEqual(
-            [(b.opcode, b.args) for b in script.blocks],
-            [
-                ("motion_move_steps", (10,)),
-                ("motion_turn_right", (15,)),
-                ("looks_say", ("Hello",)),
-            ],
-        )
+    def test_out_of_screen_and_active_switching(self):
+        obj = Object()
+        obj.set_viewport(0, 0, 100, 100).set_position(200, 10)
+        self.assertEqual(obj.status, STATUS_OUT_OF_SCREEN)
+        obj.set_position(20, 10)
+        self.assertEqual(obj.status, STATUS_ACTIVE)
+
+    def test_hide_show_preserves_metadata_and_restores_state(self):
+        obj = Object().set_viewport(0, 0, 100, 100).set_position(20, 20)
+        obj.hide()
+        obj.set_meta("x", 220)
+        self.assertEqual(obj.status, STATUS_HIDDEN)
+        obj.show()
+        self.assertEqual(obj.status, STATUS_OUT_OF_SCREEN)
+
+    def test_object_group_inherits_object_and_propagates_viewport(self):
+        group = ObjectGroup()
+        child = Object().set_position(999, 10)
+        group.add(child).set_viewport(0, 0, 100, 100)
+        self.assertIsInstance(group, Object)
+        self.assertEqual(child.status, STATUS_OUT_OF_SCREEN)
+
+    def test_callbacks_can_be_set_from_plain_python_functions(self):
+        obj = Object()
+
+        def click_handler(value):
+            return value + 1
+
+        obj.on_click(click_handler)
+        self.assertEqual(obj.trigger_click(41), 42)
 
 
 if __name__ == "__main__":

@@ -38,7 +38,7 @@ class TestScratchObjects(unittest.TestCase):
         self.assertIsInstance(group, Object)
         self.assertEqual(child.status, STATUS_OUT_OF_SCREEN)
 
-    def test_callbacks_can_be_set_from_plain_python_functions(self):
+    def test_callback_direct_assignment(self):
         obj = Object()
 
         def click_handler(value):
@@ -48,7 +48,7 @@ class TestScratchObjects(unittest.TestCase):
         self.assertIs(returned, click_handler)
         self.assertEqual(obj.trigger_click(41), 42)
 
-    def test_callbacks_can_also_use_decorator_style(self):
+    def test_callback_decorator_with_parentheses(self):
         obj = Object()
 
         @obj.on_click()

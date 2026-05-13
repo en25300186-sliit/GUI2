@@ -141,10 +141,10 @@ class Object:
         viewport_x, viewport_y, viewport_width, viewport_height = self._viewport
 
         outside = (
-            x + width < viewport_x
-            or x > viewport_x + viewport_width
-            or y + height < viewport_y
-            or y > viewport_y + viewport_height
+            x + width <= viewport_x
+            or x >= viewport_x + viewport_width
+            or y + height <= viewport_y
+            or y >= viewport_y + viewport_height
         )
         self.status = STATUS_OUT_OF_SCREEN if outside else STATUS_ACTIVE
 

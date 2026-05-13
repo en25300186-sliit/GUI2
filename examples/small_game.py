@@ -42,7 +42,7 @@ def run() -> None:
         if other is coin:
             collect_coin()
 
-    print("Small Game: reach the C coin with P.")
+    print("Small Game: reach the coin (C) with the player (P).")
     print("Controls: a=left, d=right, w=up, s=down, q=quit")
 
     while True:
@@ -74,6 +74,7 @@ def run() -> None:
         ny = max(0, min(9, py + dy))
         player.set_position(nx, ny)
 
+        # This example performs collision checks in the loop, then triggers callbacks.
         if player.status == STATUS_ACTIVE and intersects(player, coin):
             player.trigger_collide(coin)
 

@@ -39,6 +39,21 @@ player.show()              # object returns as active/out_of_screen based on vie
 
 `on_click`/`on_collide` callbacks run only when object status is `active` (skipped for `out_of_screen` and `hidden`).
 
+## Small game example
+
+Run a tiny interactive game that uses `Object` + `ObjectGroup`:
+
+```bash
+python examples/small_game.py
+```
+
+Controls:
+- `a` left
+- `d` right
+- `w` up
+- `s` down
+- `q` quit
+
 ## Tests
 
 ```bash

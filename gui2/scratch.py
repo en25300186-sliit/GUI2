@@ -9,6 +9,7 @@ from typing import Any, Callable
 STATUS_ACTIVE = "active"
 STATUS_OUT_OF_SCREEN = "out_of_screen"
 STATUS_HIDDEN = "hidden"
+CallbackDecorator = Callable[[Callable[..., Any]], Callable[..., Any]]
 
 
 @dataclass
@@ -74,7 +75,7 @@ class Object:
         self._notify_gui_sync()
         return self
 
-    def on_click(self, callback: Callable[..., Any] | None = None) -> "Object" | Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def on_click(self, callback: Callable[..., Any] | None = None) -> "Object" | CallbackDecorator:
         if callback is not None:
             self.metadata["on_click"] = callback
             self._notify_gui_sync()
@@ -87,9 +88,7 @@ class Object:
 
         return decorator
 
-    def on_collide(
-        self, callback: Callable[..., Any] | None = None
-    ) -> "Object" | Callable[[Callable[..., Any]], Callable[..., Any]]:
+    def on_collide(self, callback: Callable[..., Any] | None = None) -> "Object" | CallbackDecorator:
         if callback is not None:
             self.metadata["on_collide"] = callback
             self._notify_gui_sync()
